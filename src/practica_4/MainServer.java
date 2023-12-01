@@ -24,7 +24,7 @@ import java.util.logging.Logger;
  * Autor: Juan Carlos Cuevas Mart�nez
  *
  ******************************************************
- * Alumno 1: Sergio Real Gonz�lez
+ * Alumno 1: Sergio Real Gonzalez fdfgf
  * Alumno 2: Sebastian Zamora Molina
  *
  ******************************************************/
