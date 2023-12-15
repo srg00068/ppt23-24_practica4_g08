@@ -3,6 +3,7 @@ package practica_4;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.logging.Level;
@@ -22,8 +23,8 @@ import java.util.logging.Logger;
  * Autor: Juan Carlos Cuevas Mart�nez
  *
  ******************************************************
- * Alumno 1: 
- * Alumno 2:
+ * Alumno 1: Sergio Real González  
+ * Alumno 2: Sebastian Zamora Molina 
  *
  ******************************************************/
 public class HttpConnection implements Runnable {
@@ -44,7 +45,7 @@ public class HttpConnection implements Runnable {
 			//dos.flush();
 			BufferedReader bis = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-			String line = bis.readLine();
+			String line = bis.readLine(); //Get/ruta/HTTP1.1
 			String partes[]=line.split(" ");
 			if(partes.length==3){
 				if (partes[0].compareToIgnoreCase("get")==0){
@@ -58,10 +59,19 @@ public class HttpConnection implements Runnable {
 					//Abrir archivo comparando la segunda posicion de la cadena, y en el catch error 404
 
 
-
-					dos.write("HTTP/1.1 200 Bad Request\r\n\r\n".getBytes());
+                                        byte[] data=readFile(partes[1]);
+                                        
+                                        if(data==null){
+                                            
+                                        }else{
+                                        
+					dos.write("HTTP/1.1 200 Ok\r\n".getBytes());
+                                        dos.write(("Content-Type"+GetContenType(partes[1])+"\r\n").getBytes());
+                                        dos.write((" Content-Length"+data.length+"\r\n").getBytes());
+                                        dos.write("/r/n".getBytes()); //Fin de cabeceras;
 					dos.flush();
-					dos.write("<html><h1> Hola </h1> </html>".getBytes());
+					dos.write(data);
+                                        }
 				}else{
 					dos.write("HTTP/1.1 405 Metod is not Allowed\r\n\r\n".getBytes());
 					dos.flush();
@@ -70,13 +80,19 @@ public class HttpConnection implements Runnable {
 			}else{
 				dos.write("HTTP/1.1 400 Bad Request\r\n\r\n".getBytes()); //el segundo \r\n es fin de cabeceras
 				dos.flush();
-			} //comprobar si el metodo utilizado es get. si no es get error 405
-			while (!(line=bis.readLine()).equals("") && line!=null) {
-				System.out.println("Le�do["+line.length()+"]: "+line);
-				dos.write(("ECO " + line + "\r\n").getBytes());
-				dos.flush();
 			}
-		} catch (IOException ex) {
+                }catch(FileNotFoundException ex){
+                                try{
+                                dos.write("HTTP/1.1 404 Not Found\r\n\r\n".getBytes()); //el segundo \r\n es fin de cabeceras
+				dos.flush();
+                                } catch (IOException ex1){
+                                   System.out.println("error"); 
+                                }
+                                  
+                                
+                //comprobar si el metodo utilizado es get. si no es get error 405
+			
+                }catch (IOException ex) {
 			Logger.getLogger(HttpConnection.class.getName()).log(Level.SEVERE, null, ex);
 		} finally {
 			try {
@@ -85,8 +101,39 @@ public class HttpConnection implements Runnable {
 			} catch (IOException ex) {
 				Logger.getLogger(HttpConnection.class.getName()).log(Level.SEVERE, null, ex);
 			}
-		}
+		
 
 	}
+        
+        }
 
+        
+        protected  byte[] readFile(String path) throws FileNotFoundException{ 
+            
+                return ("<html><body><h1> Hola"+ path +" </h1></body> </html>").getBytes();
+            
+            
+        }
+        
+        protected String GetContenType(String path){
+            if(path.endsWith(".html")||path.endsWith(".htm")){
+                return "text.html";
+            }
+            else if(path.endsWith(".jpg")||path.endsWith(".jpeg")){
+                return "image.jpg";
+            }
+            else if(path.endsWith(".css")){
+                return "text.css";
+            }else{
+               
+                String [] n=path.split(".");
+                if(n.length>=2){
+                 return "application/"+n[n.length-1];   
+                }else{
+                    return "ns";
+                }
+                
+            }
+        }
 }
+
