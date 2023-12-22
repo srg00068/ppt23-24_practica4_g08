@@ -2,6 +2,8 @@ package practica_4;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
@@ -66,9 +68,9 @@ public class HttpConnection implements Runnable {
                                         }else{
                                         
 					dos.write("HTTP/1.1 200 Ok\r\n".getBytes());
-                                        dos.write(("Content-Type"+GetContenType(partes[1])+"\r\n").getBytes());
-                                        dos.write((" Content-Length"+data.length+"\r\n").getBytes());
-                                        dos.write("/r/n".getBytes()); //Fin de cabeceras;
+                                        dos.write(("Content-Type:"+GetContenType(partes[1])+"\r\n").getBytes());
+                                        dos.write(("Content-Length:"+data.length+"\r\n").getBytes());
+                                        dos.write("\r\n".getBytes()); //Fin de cabeceras;
 					dos.flush();
 					dos.write(data);
                                         }
@@ -92,8 +94,14 @@ public class HttpConnection implements Runnable {
                                 
                 //comprobar si el metodo utilizado es get. si no es get error 405
 			
-                }catch (IOException ex) {
-			Logger.getLogger(HttpConnection.class.getName()).log(Level.SEVERE, null, ex);
+                }catch (IOException ex2) {
+			try{
+                                dos.write("HTTP/1.1 404 Not Found\r\n\r\n".getBytes()); //el segundo \r\n es fin de cabeceras
+				dos.flush();
+                                } catch (IOException ex1){
+                                   System.out.println("error"); 
+                                }
+                                  
 		} finally {
 			try {
 				dos.close();
@@ -108,22 +116,26 @@ public class HttpConnection implements Runnable {
         }
 
         
-        protected  byte[] readFile(String path) throws FileNotFoundException{ 
+        protected  byte[] readFile(String path) throws FileNotFoundException, IOException{ 
+            File f=new File ("."+path);
+            FileInputStream fis=new FileInputStream(f);   
+            byte [] datos;
+            datos = new byte[(int)f.length()];
+            fis.read(datos);
+                return (datos);
             
-                return ("<html><body><h1> Hola"+ path +" </h1></body> </html>").getBytes();
-            
-            
+            //Ahora lee archivos
         }
         
         protected String GetContenType(String path){
             if(path.endsWith(".html")||path.endsWith(".htm")){
-                return "text.html";
+                return "text/html";
             }
             else if(path.endsWith(".jpg")||path.endsWith(".jpeg")){
-                return "image.jpg";
+                return "image/jpg";
             }
             else if(path.endsWith(".css")){
-                return "text.css";
+                return "text/css";
             }else{
                
                 String [] n=path.split(".");
