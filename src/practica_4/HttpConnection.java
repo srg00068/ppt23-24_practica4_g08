@@ -50,6 +50,7 @@ public class HttpConnection implements Runnable {
 			String line = bis.readLine(); //Get/ruta/HTTP1.1
 			String partes[]=line.split(" ");
 			if(partes.length==3){
+                            System.out.println("Cabecera host:[" +partes[1]+"]: ");
 				if (partes[0].compareToIgnoreCase("get")==0){
 
 					while (!(line=bis.readLine()).equals("") && line!=null) {
@@ -122,6 +123,7 @@ public class HttpConnection implements Runnable {
             byte [] datos;
             datos = new byte[(int)f.length()];
             fis.read(datos);
+            System.out.println("Cabecera host:"+ socket.getLocalAddress());
                 return (datos);
             
             //Ahora lee archivos
